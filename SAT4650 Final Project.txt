@@ -1,0 +1,272 @@
+import tkinter as tk
+from tkinter import messagebox as tkMesssageBox
+import pandas as pd
+import numpy as np
+
+class HearingCheck:
+    
+    def __init__(self,data_df):
+        self.df = data_df
+        self.fig = None
+
+        # initializing variables
+        self.ent_baseline_ageRint = 0
+        self.ent_baseline_ageLint = 0
+        self.ent_current_ageint = 0
+        self.baseline_rowR = 0
+        self.baseline_rowL = 0
+        self.current_row = 0
+        self.current_R2intk = 0
+        self.baseline_R2kint = 0
+        self.current_R3kint = 0
+        self.baseline_R3kint = 0
+        self.current_R4kint = 0
+        self.baseline_R4kint = 0
+        self.current_L2kint = 0
+        self.baseline_L2kint = 0
+        self.current_L3kint = 0
+        self.baseline_L3kint = 0
+        self.current_L4kint = 0
+        self.baseline_L4kint = 0
+        self.diff2kR = 0
+        self.diff3kR = 0
+        self.diff4kR = 0
+        self.diff2kL = 0
+        self.diff3kL = 0
+        self.diff4kL = 0
+        self.diffR = 0
+        self.diffL = 0
+ 
+        # main frame, title, and label
+        self.root = tk.Tk()
+        self.root.title('Calculate Hearing Loss and Age-Adjusted Hearing Loss')
+        self.root.geometry('600x500')
+
+        self.lb_intro1 = tk.Label(self.root,text="This program calculates hearing loss.")
+        self.lb_intro1.grid(row=0,column=0,sticky="W")
+        self.lb_intro2 = tk.Label(self.root,text="       ")
+        self.lb_intro2.grid(row=1,column=0)
+
+        # sex radiobutton data
+        self.radio_sex_var = tk.IntVar(self.root)
+        self.radio_sex_var.set(1)
+
+        self.lb_sex = tk.Label(self.root,text="What is the sex of the patient?")
+        self.lb_sex.grid(row=2,column=0,sticky="W")
+        self.rb_Male = tk.Radiobutton(self.root,text="Male",variable=self.radio_sex_var,value=1)
+        self.rb_Male.grid(row=2,column=1,sticky="W")
+        self.rb_Female = tk.Radiobutton(self.root,text="Female",variable=self.radio_sex_var,value=2)
+        self.rb_Female.grid(row=2,column=2,sticky="W")
+        self.lb_intro3 = tk.Label(self.root,text="    ")
+        self.lb_intro3.grid(row=3,column=0)
+
+        # baseline age data
+        self.lb_baseline_ageR = tk.Label(self.root,text="What was the age at baseline for the right ear?")
+        self.lb_baseline_ageR.grid(row=4,column=0,sticky="W")
+        self.ent_baseline_ageR = tk.Entry(self.root,width=4)
+        self.ent_baseline_ageR.grid(row=4,column=1,sticky="W")
+        self.ent_baseline_ageR.insert(0,"20")
+
+        self.lb_baseline_ageL = tk.Label(self.root,text="What was the age at baseline for the left ear?")
+        self.lb_baseline_ageL.grid(row=6,column=0,sticky="W")
+        self.ent_baseline_ageL = tk.Entry(self.root,width=4)
+        self.ent_baseline_ageL.grid(row=6,column=1,sticky="W")
+        self.ent_baseline_ageL.insert(0,"20")
+        
+        # baseline hearing data
+        self.lb_baseline_values = tk.Label(self.root,text="What are the baseline test values?")
+        self.lb_baseline_values.grid(row=8,column=0,sticky="W")
+        
+        self.lb_baseline_freq2k = tk.Label(self.root,text="  2000Hz")
+        self.lb_baseline_freq2k.grid(row=8,column=1,sticky="W")
+        
+        self.lb_baseline_freq3k = tk.Label(self.root,text="3000Hz")
+        self.lb_baseline_freq3k.grid(row=8,column=2,sticky="N")
+                
+        self.lb_baseline_freq4k = tk.Label(self.root,text="4000Hz")
+        self.lb_baseline_freq4k.grid(row=8,column=3,sticky="W")
+
+        self.lb_baseline_right = tk.Label(self.root,text="Right ear")
+        self.lb_baseline_right.grid(row=9,column=0,sticky="E")
+
+        self.baseline_R2k = tk.Entry(self.root,width=6)
+        self.baseline_R2k.grid(row=9,column=1,sticky="N")
+        self.baseline_R2k.insert(0,"5")
+        self.baseline_R3k = tk.Entry(self.root,width=6)
+        self.baseline_R3k.grid(row=9,column=2,sticky="N")
+        self.baseline_R3k.insert(0,"5")
+        self.baseline_R4k = tk.Entry(self.root,width=6)
+        self.baseline_R4k.grid(row=9,column=3,sticky="W")
+        self.baseline_R4k.insert(0,"5")
+
+        self.lb_baseline_left = tk.Label(self.root,text="Left ear")
+        self.lb_baseline_left.grid(row=10,column=0,sticky="E")
+
+        self.baseline_L2k = tk.Entry(self.root,width=6)
+        self.baseline_L2k.grid(row=10,column=1,sticky="N")
+        self.baseline_L2k.insert(0,"5")
+        self.baseline_L3k = tk.Entry(self.root,width=6)
+        self.baseline_L3k.grid(row=10,column=2,sticky="N")
+        self.baseline_L3k.insert(0,"5")
+        self.baseline_L4k = tk.Entry(self.root,width=6)
+        self.baseline_L4k.grid(row=10,column=3,sticky="W")
+        self.baseline_L4k.insert(0,"5")
+
+        self.lb_intro6 = tk.Label(self.root,text="    ")
+        self.lb_intro6.grid(row=11,column=0)
+
+        # current age data
+        self.lb_current_age = tk.Label(self.root,text="What is the current age?")
+        self.lb_current_age.grid(row=12,column=0,sticky="W")
+
+        self.ent_current_age = tk.Entry(self.root,width=4)
+        self.ent_current_age.grid(row=12,column=1,sticky="W")
+        self.ent_current_age.insert(0,"60")
+        self.lb_intro7 = tk.Label(self.root,text="    ")
+        self.lb_intro7.grid(row=13,column=0)
+        
+        # current hearing data
+        self.lb_current_values = tk.Label(self.root,text="What are the current test values?")
+        self.lb_current_values.grid(row=14,column=0,sticky="W")
+        
+        self.lb_current_freq2k = tk.Label(self.root,text="  2000Hz")
+        self.lb_current_freq2k.grid(row=14,column=1,sticky="W")
+        
+        self.lb_current_freq3k = tk.Label(self.root,text="3000Hz")
+        self.lb_current_freq3k.grid(row=14,column=2,sticky="N")
+                
+        self.lb_current_freq4k = tk.Label(self.root,text="4000Hz")
+        self.lb_current_freq4k.grid(row=14,column=3,sticky="W")
+
+        self.lb_current_right = tk.Label(self.root,text="Right ear")
+        self.lb_current_right.grid(row=15,column=0,sticky="E")
+
+        self.current_R2k = tk.Entry(self.root,width=6)
+        self.current_R2k.grid(row=15,column=1,sticky="N")
+        self.current_R2k.insert(0,"45")
+        self.current_R3k = tk.Entry(self.root,width=6)
+        self.current_R3k.grid(row=15,column=2,sticky="N")
+        self.current_R3k.insert(0,"45")
+        self.current_R4k = tk.Entry(self.root,width=6)
+        self.current_R4k.grid(row=15,column=3,sticky="W")
+        self.current_R4k.insert(0,"45")
+
+        self.lb_current_left = tk.Label(self.root,text="Left ear")
+        self.lb_current_left.grid(row=16,column=0,sticky="E")
+                     
+        self.current_L2k = tk.Entry(self.root,width=6)
+        self.current_L2k.grid(row=16,column=1,sticky="N")
+        self.current_L2k.insert(0,"45")
+        self.current_L3k = tk.Entry(self.root,width=6)
+        self.current_L3k.grid(row=16,column=2,sticky="N")
+        self.current_L3k.insert(0,"45")
+        self.current_L4k = tk.Entry(self.root,width=6)
+        self.current_L4k.grid(row=16,column=3,sticky="W")
+        self.current_L4k.insert(0,"45")
+
+        self.lb_intro8 = tk.Label(self.root,text="    ")
+        self.lb_intro8.grid(row=17,column=0)
+
+        # button to show results
+        self.btn = tk.Button(self.root,text="Calculate",command=self.calculate).grid(row=20,column=0)
+
+        self.lb_resultR = tk.Label(self.root,text="The right-sided hearing loss is: ").grid(row=21,column=0,sticky="W")
+        self.resultR = tk.Entry(self.root,width=6)
+        self.resultR.grid(row=21,column=1,sticky="N")
+
+        self.lb_resultL = tk.Label(self.root,text="The left-sided hearing loss is: ").grid(row=22,column=0,sticky="W")
+        self.resultL = tk.Entry(self.root,width=6)
+        self.resultL.grid(row=22,column=1,sticky="N")
+
+        self.lb_age_adjusted_resultR = tk.Label(self.root,text="The age-adjusted right-sided hearing loss is:")
+        self.lb_age_adjusted_resultR.grid(row=23,column=0,sticky="W")
+        self.resultR_adj = tk.Entry(self.root,width=6)
+        self.resultR_adj.grid(row=23,column=1,sticky="N")
+
+        self.lb_age_adjusted_resultL = tk.Label(self.root,text="The age-adjusted left-sided hearing loss is:")
+        self.lb_age_adjusted_resultL.grid(row=24,column=0,sticky="W")
+        self.resultL_adj = tk.Entry(self.root,width=6)
+        self.resultL_adj.grid(row=24,column=1,sticky="N")
+
+        self.root.mainloop()
+
+    def calculate(self):
+        # setting column and row for csv entry retrieval
+        sex_str = "Male" if self.radio_sex_var.get() == 1 else "Female"
+        print("The sex of the patient is: ",sex_str)
+
+        baseline_age_r = int(self.ent_baseline_ageR.get())
+        baseline_age_r = 20 if baseline_age_r < 20 else baseline_age_r
+        baseline_age_r = 60 if baseline_age_r > 60 else baseline_age_r
+        print("The baseline age right ear is: ",baseline_age_r)
+        
+        baseline_age_l = int(self.ent_baseline_ageL.get())
+        baseline_age_l = 20 if baseline_age_l < 20 else baseline_age_l
+        baseline_age_l = 60 if baseline_age_l > 60 else baseline_age_l
+        print("The baseline age left ear is: ",baseline_age_l)
+      
+        current_age = int(self.ent_current_age.get())
+        current_age = 20 if current_age < 20 else current_age
+        current_age = 60 if current_age > 60 else current_age
+        print("The current age is: ",current_age)
+        
+        # calculating the hearing loss
+        diff2k_r = int(self.current_R2k.get()) - int(self.baseline_R2k.get())
+        diff3k_r = int(self.current_R3k.get()) - int(self.baseline_R3k.get())
+        diff4k_r = int(self.current_R4k.get()) - int(self.baseline_R4k.get())
+
+        diff2k_l = int(self.current_L2k.get()) - int(self.baseline_L2k.get())
+        diff3k_l = int(self.current_L3k.get()) - int(self.baseline_L3k.get())
+        diff4k_l = int(self.current_L4k.get()) - int(self.baseline_L4k.get())
+
+        diff_r = (diff2k_r + diff3k_r + diff4k_r) / 3
+        diff_l = (diff2k_l + diff3k_l + diff4k_l) / 3
+
+        # calculating the age-adjusted hearing loss
+        age_adjust_r_2k = df[df['Age'] == current_age][f'{sex_str}2k'].values[0]-df[df['Age'] == baseline_age_r][f'{sex_str}2k'].values[0]
+        print("The age ajustment on the right for 2000 Hz is: ",age_adjust_r_2k)
+        age_adjust_r_3k = df[df['Age'] == current_age][f'{sex_str}3k'].values[0]-df[df['Age'] == baseline_age_r][f'{sex_str}3k'].values[0]
+        print("The age ajustment on the right for 3000 Hz is: ",age_adjust_r_3k)
+        age_adjust_r_4k = df[df['Age'] == current_age][f'{sex_str}4k'].values[0]-df[df['Age'] == baseline_age_r][f'{sex_str}4k'].values[0]
+        print("The age ajustment on the right for 4000 Hz is: ",age_adjust_r_4k)
+        age_adjust_l_2k = df[df['Age'] == current_age][f'{sex_str}2k'].values[0]-df[df['Age'] == baseline_age_l][f'{sex_str}2k'].values[0]
+        print("The age ajustment on the left for 2000 Hz is: ",age_adjust_l_2k)
+        age_adjust_l_3k = df[df['Age'] == current_age][f'{sex_str}3k'].values[0]-df[df['Age'] == baseline_age_l][f'{sex_str}3k'].values[0]
+        print("The age ajustment on the left for 2000 Hz is: ",age_adjust_l_3k)
+        age_adjust_l_4k = df[df['Age'] == current_age][f'{sex_str}4k'].values[0]-df[df['Age'] == baseline_age_l][f'{sex_str}4k'].values[0]
+        print("The age ajustment on the left for 2000 Hz is: ",age_adjust_l_4k)
+
+        age_adjust_r = (age_adjust_r_2k + age_adjust_r_3k + age_adjust_r_4k) / 3
+        print("The average age adjustment on the right is: ",age_adjust_r)
+        age_adjust_l = (age_adjust_l_2k + age_adjust_l_3k + age_adjust_l_4k) / 3
+        print("The average age adjustment on the left is: ",age_adjust_l)
+       
+        age_adjusted_loss_r = diff_r - age_adjust_r
+        print("The age adjusted loss for the right ear is: ",age_adjusted_loss_r)
+        age_adjusted_loss_l = diff_l - age_adjust_l
+        print("The age adjusted loss for the left ear is: ",age_adjusted_loss_l)
+        print("Please note that the age correction values are from 20 to 60")
+        print("For values outside this range, the program reassignes age to")
+        print("20 if less than 20 and 60 if greater than 60")
+        print("     ")
+        print("     ")
+              
+        # zeroing old results and displaying the new result
+        self.resultR.delete(0,tk.END)
+        self.resultL.delete(0,tk.END)
+        self.resultR_adj.delete(0,tk.END)
+        self.resultL_adj.delete(0,tk.END)
+
+        self.resultR.insert(0,f"{diff_r}")
+        self.resultL.insert(0,f"{diff_l}")
+        self.resultR_adj.insert(0,f"{age_adjusted_loss_r}")
+        self.resultL_adj.insert(0,f"{age_adjusted_loss_l}")
+
+# calling the class
+if __name__ == '__main__':
+    df = pd.read_csv("PandasHearingAgeCorrection.csv")
+    HearingCheck = HearingCheck(df)
+
+
+
+
